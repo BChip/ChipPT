@@ -25,7 +25,8 @@ template = """You are a helpful assistant who generates comma separated lists.
 A user will pass in a category, and you should generate 5 objects in that category in a comma separated list.
 ONLY return a comma separated list, and nothing more."""
 system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-human_template = "{text}"
+human_template = """[Instruction]: {question}
+                    [Agent Description]: """
 human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
 chat_prompt = ChatPromptTemplate.from_messages(
@@ -33,7 +34,6 @@ chat_prompt = ChatPromptTemplate.from_messages(
 )
 chain = LLMChain(
     llm=ChatOpenAI(
-        openai_api_key="sk-",
         # model_name="gpt-4",
         cache=True,
         temperature=0.0,
@@ -66,8 +66,6 @@ dictified = markdown_to_json.dictify(value)
 # get the first key from dictified
 title = list(dictified.keys())[0]
 
-print(title)
-
 
 # flatten dictified
 def flatten(d, parent_key="", sep="_"):
@@ -91,7 +89,7 @@ from typing import List
 @dataclass
 class Paper:
     title: Text
-    content: Text
+    content: List[Text]
     references: List[Text]
 
 
@@ -100,10 +98,24 @@ dictified = flatten(dictified)
 # get values from dictified
 content = list(dictified.values())
 
+# concat content together
+
 references = [
     value
     for key, value in dictified.items()
     if "References" in key or "Cited" in key or "Bibliography" in key
 ]
 
-print(references)
+paper = Paper(title=title, content=content, references=references)
+
+print(paper.title)
+print("")
+# loop through content
+for c in paper.content:
+    print(c)
+    print("")
+
+# loop through references
+for r in paper.references:
+    print(r)
+    print("")
